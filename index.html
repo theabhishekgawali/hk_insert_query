@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SQL Query Builder (Static with Editable Fields)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    textarea {
+      resize: none;
+    }
+    .btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SQL Query Builder</h1>
+
+    <label>Property Code:</label>
+    <input type="text" id="property_code" value="SBNHT" />
+
+    <label>Reservation ID:</label>
+    <input type="text" id="reservation_id" value="46669fa8-723c-4f69-8aac-1591f1aa584b" />
+
+    <label>Property ID:</label>
+    <input type="text" id="property_id" value="d6700366-ef44-4ace-a745-09651b689fad" />
+
+    <label>GNR:</label>
+    <input type="text" id="gnr" value="359042574" />
+
+    <label>Arrival Date:</label>
+    <input type="text" id="arrival_date" value="2023-09-29" />
+
+    <label>Hilton CNF:</label>
+    <input type="text" id="hilton_cnf" value="54130444" />
+
+    <label>Stay ID:</label>
+    <input type="text" id="stay_id" value="3172177483" />
+
+    <label>Cancellation Policy Deadline:</label>
+    <input type="text" id="cancellation_policy_deadline" value="2023-09-14" />
+
+    <button class="btn" onclick="generateQuery()">Generate SQL Query</button>
+
+    <label>Generated SQL Query:</label>
+    <textarea id="output" rows="8" readonly></textarea>
+  </div>
+
+  <script>
+    function quote(val) {
+      if (!val || val.trim() === "") return "NULL";
+      return `'${val.replace(/'/g, "''")}'`;
+    }
+
+    function generateQuery() {
+      const property_code = document.getElementById("property_code").value.trim() || "SBNHT";
+      const reservation_id = document.getElementById("reservation_id").value.trim();
+      const property_id = document.getElementById("property_id").value.trim();
+      const gnr = document.getElementById("gnr").value.trim();
+      const arrival_date = document.getElementById("arrival_date").value.trim();
+      const hilton_cnf = document.getElementById("hilton_cnf").value.trim();
+      const stay_id = document.getElementById("stay_id").value.trim();
+      const cancellation_policy_deadline = document.getElementById("cancellation_policy_deadline").value.trim();
+
+      const sql = `${property_code}|INSERT INTO hilton_reservations_metadata ( id, reservation_id, property_id, gnr, arrival_date, hilton_cnf, fraud_order_id, fraud_checkin_response, checkin_source, lsn, stay_id, guest_id, force_sell, origin_res_id, booking_source, rate_code_overridden, modifyResId, subBookingSource, cancellation_policy_deadline, cancellation_policy_code, certificates, sell_cash_value, commission_amount, commission_type, primary_gds_code, secondary_gds_code, zero_rate_stay, is_fnb_eligible, guest_title, middle_initial, account_id, guarantee_card, guarantee_card_type, guarantee_card_expiry ) VALUES ( uuid(), ${quote(reservation_id)}, ${quote(property_id)}, ${quote(gnr)}, ${quote(arrival_date)}, ${quote(hilton_cnf)}, NULL, NULL, NULL, NULL, ${quote(stay_id)}, NULL, '0', 'OTHER', 'OTHER', '0', 'OTHER', 'OTHER', ${quote(cancellation_policy_deadline)}, 'NREF', NULL, '1000', '0', NULL, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL );`;
+
+      document.getElementById("output").value = sql;
+    }
+
+    // Generate initial SQL
+    generateQuery();
+
+    // Auto-update SQL when typing
+    document.querySelectorAll("input").forEach(inp => {
+      inp.addEventListener("input", generateQuery);
+    });
+  </script>
+</body>
+</html>
