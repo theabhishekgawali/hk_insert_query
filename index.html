@@ -113,6 +113,24 @@
     document.querySelectorAll("input").forEach(inp => {
       inp.addEventListener("input", generateQuery);
     });
+    function calculateDeadline(arrivalStr) {
+    const arrival = new Date(arrivalStr);
+    // This handles the month/year rollover automatically
+    arrival.setDate(arrival.getDate() - 15); 
+    
+    return arrival.toISOString().split('T')[0];
+}
+
+// Inside your generateQuery function:
+const arrival_date = document.getElementById("arrival_date").value;
+const calculated_deadline = calculateDeadline(arrival_date);
+
+// Update the UI field so the user sees it
+document.getElementById("cancellation_policy_deadline").value = calculated_deadline;
+
+
+
+    
   </script>
 </body>
 </html>
