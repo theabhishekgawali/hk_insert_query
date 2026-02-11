@@ -101,7 +101,7 @@
       const stay_id = document.getElementById("stay_id").value.trim();
       const cancellation_policy_deadline = document.getElementById("cancellation_policy_deadline").value.trim();
 
-      const sql = `${property_code}|INSERT INTO hilton_reservations_metadata ( id, reservation_id, property_id, gnr, arrival_date, hilton_cnf, fraud_order_id, fraud_checkin_response, checkin_source, lsn, stay_id, guest_id, force_sell, origin_res_id, booking_source, rate_code_overridden, modifyResId, subBookingSource, cancellation_policy_deadline, cancellation_policy_code, certificates, sell_cash_value, commission_amount, commission_type, primary_gds_code, secondary_gds_code, zero_rate_stay, is_fnb_eligible, guest_title, middle_initial, account_id, guarantee_card, guarantee_card_type, guarantee_card_expiry ) VALUES ( uuid(), ${quote(reservation_id)}, ${quote(property_id)}, ${quote(gnr)}, ${quote(arrival_date)}, ${quote(hilton_cnf)}, NULL, NULL, NULL, NULL, ${quote(stay_id)}, NULL, '0', 'OTHER', 'OTHER', '0', 'OTHER', 'OTHER', ${quote(cancellation_policy_deadline)}, 'NREF', NULL, '1000', '0', NULL, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL );`;
+      const sql = `${property_code}|INSERT INTO hilton_reservations_metadata VALUES ( uuid(), ${quote(reservation_id)}, ${quote(property_id)}, ${quote(gnr)}, ${quote(arrival_date)}, ${quote(hilton_cnf)}, NULL, NULL, NULL, NULL, ${quote(stay_id)}, NULL, '0', 'OTHER', 'OTHER', '0', 'OTHER', 'OTHER', ${quote(cancellation_policy_deadline)}, 'NREF', NULL, '1000', '0', NULL, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL );`;
 
       document.getElementById("output").value = sql;
     }
