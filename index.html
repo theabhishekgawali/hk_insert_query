@@ -3,52 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SQL Query Builder (Static with Editable Fields)</title>
+  <title>SQL Query Builder (Auto-Date Calculation)</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      padding: 20px;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    input, textarea, button {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    textarea {
-      resize: none;
-    }
-    .btn {
-      background: #007bff;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .btn:hover {
-      background: #0056b3;
-    }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+    .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h1 { text-align: center; margin-bottom: 20px; }
+    label { display: block; font-weight: bold; margin-bottom: 5px; }
+    input, textarea, button { width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+    textarea { resize: none; font-family: monospace; }
+    .btn { background: #007bff; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
+    .btn:hover { background: #0056b3; }
   </style>
 </head>
 <body>
@@ -67,7 +31,7 @@
     <label>GNR:</label>
     <input type="text" id="gnr" value="359042574" />
 
-    <label>Arrival Date:</label>
+    <label>Arrival Date (YYYY-MM-DD):</label>
     <input type="text" id="arrival_date" value="2023-09-29" />
 
     <label>Hilton CNF:</label>
@@ -76,7 +40,7 @@
     <label>Stay ID:</label>
     <input type="text" id="stay_id" value="3172177483" />
 
-    <label>Cancellation Policy Deadline:</label>
+    <label>Cancellation Policy Deadline (Auto-Calculated):</label>
     <input type="text" id="cancellation_policy_deadline" value="2023-09-14" />
 
     <button class="btn" onclick="generateQuery()">Generate SQL Query</button>
@@ -91,46 +55,49 @@
       return `'${val.replace(/'/g, "''")}'`;
     }
 
+    // Helper function to handle the 15-day math
+    function calculateDeadline(arrivalStr) {
+      const arrival = new Date(arrivalStr);
+      // Check if the date is valid before doing math
+      if (isNaN(arrival.getTime())) return ""; 
+      
+      arrival.setDate(arrival.getDate() - 15);
+      
+      // Returns YYYY-MM-DD format
+      return arrival.toISOString().split('T')[0];
+    }
+
     function generateQuery() {
+      // 1. Get Values
       const property_code = document.getElementById("property_code").value.trim() || "SBNHT";
+      const arrival_date = document.getElementById("arrival_date").value.trim();
+      
+      // 2. RUN CALCULATION LOGIC
+      const calculated_deadline = calculateDeadline(arrival_date);
+      if (calculated_deadline) {
+          document.getElementById("cancellation_policy_deadline").value = calculated_deadline;
+      }
+
       const reservation_id = document.getElementById("reservation_id").value.trim();
       const property_id = document.getElementById("property_id").value.trim();
       const gnr = document.getElementById("gnr").value.trim();
-      const arrival_date = document.getElementById("arrival_date").value.trim();
       const hilton_cnf = document.getElementById("hilton_cnf").value.trim();
       const stay_id = document.getElementById("stay_id").value.trim();
-      const cancellation_policy_deadline = document.getElementById("cancellation_policy_deadline").value.trim();
+      const deadline = document.getElementById("cancellation_policy_deadline").value.trim();
 
-      const sql = `${property_code}|INSERT INTO hilton_reservations_metadata VALUES ( uuid(), ${quote(reservation_id)}, ${quote(property_id)}, ${quote(gnr)}, ${quote(arrival_date)}, ${quote(hilton_cnf)}, NULL, NULL, NULL, NULL, ${quote(stay_id)}, NULL, '0', 'OTHER', 'OTHER', '0', 'OTHER', 'OTHER', ${quote(cancellation_policy_deadline)}, 'NREF', NULL, '1000', '0', NULL, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL );`;
+      // 3. Build String
+      const sql = `${property_code}|INSERT INTO hilton_reservations_metadata VALUES ( uuid(), ${quote(reservation_id)}, ${quote(property_id)}, ${quote(gnr)}, ${quote(arrival_date)}, ${quote(hilton_cnf)}, NULL, NULL, NULL, NULL, ${quote(stay_id)}, NULL, '0', 'OTHER', 'OTHER', '0', 'OTHER', 'OTHER', ${quote(deadline)}, 'NREF', NULL, '1000', '0', NULL, NULL, NULL, '0', '0', NULL, NULL, '0', NULL, NULL, NULL );`;
 
       document.getElementById("output").value = sql;
     }
 
-    // Generate initial SQL
-    generateQuery();
-
-    // Auto-update SQL when typing
+    // Auto-update SQL when typing in any field
     document.querySelectorAll("input").forEach(inp => {
       inp.addEventListener("input", generateQuery);
     });
-    function calculateDeadline(arrivalStr) {
-    const arrival = new Date(arrivalStr);
-    // This handles the month/year rollover automatically
-    arrival.setDate(arrival.getDate() - 15); 
-    
-    return arrival.toISOString().split('T')[0];
-}
 
-// Inside your generateQuery function:
-const arrival_date = document.getElementById("arrival_date").value;
-const calculated_deadline = calculateDeadline(arrival_date);
-
-// Update the UI field so the user sees it
-document.getElementById("cancellation_policy_deadline").value = calculated_deadline;
-
-
-
-    
+    // Run once on load
+    generateQuery();
   </script>
 </body>
 </html>
